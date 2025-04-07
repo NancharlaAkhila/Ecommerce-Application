@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Add Category</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #dfe9f3, #ffffff);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .wrapper {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 26px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .message {
+            margin: 15px 0;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #007bff;
+            font-weight: bold;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <h2> Add New Category</h2>
+
+    <form id="addCategoryForm">
+        <input type="text" id="categoryName" placeholder="Enter Category Name" required>
+        <button type="button" onclick="addCategory()">Add Category</button>
+    </form>
+
+    <div id="message" class="message"></div>
+
+    <a class="back-link" href="AdminHome.html"> Back to Admin Home</a>
+</div>
+
+<script>
+    function addCategory() {
+        const categoryName = document.getElementById('categoryName').value.trim();
+        const messageElement = document.getElementById('message');
+
+        if (!categoryName) {
+            showMessage("Please enter a category name.", 'error');
+            return;
+        }
+
+        fetch('http://localhost:8080/category/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ categoryName })
+        })
+        .then(response => response.text().then(text => {
+            if (response.ok) {
+                showMessage(text, 'success');
+                document.getElementById('addCategoryForm').reset();
+            } else {
+                throw new Error(text);
+            }
+        }))
+        .catch(error => showMessage("Error: " + error.message, 'error'));
+    }
+
+    function showMessage(message, type) {
+        const messageElement = document.getElementById('message');
+        messageElement.textContent = message;
+        messageElement.className = `message ${type}`;
+        messageElement.style.display = 'block';
+    }
+</script>
+
+</body>
+</html>

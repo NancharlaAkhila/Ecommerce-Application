@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shop Now</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to right, #f8f9fa, #ffffff);
+            padding: 40px;
+            color: #333;
+        }
+
+        .category-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .category-list button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .category-list button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .product-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .product {
+            background: white;
+            padding: 20px;
+            width: calc(33% - 20px);
+            border-radius: 10px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .product:hover {
+            transform: scale(1.03);
+        }
+
+        .product-info {
+            text-align: center;
+        }
+
+        .product-info h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .product-info p {
+            font-size: 16px;
+            color: #555;
+        }
+
+        .product button {
+            padding: 10px 15px;
+            margin: 8px 5px 0;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .buy-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .buy-btn:hover {
+            background-color: #218838;
+        }
+
+        .cart-btn {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .cart-btn:hover {
+            background-color: #e0a800;
+        }
+
+        @media (max-width: 768px) {
+            .product {
+                width: calc(50% - 20px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .product {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h2>Shop by Category</h2>
+    <div class="category-list" id="categoryList"></div>
+
+    <h3>Products:</h3>
+    <div class="product-list" id="productList"></div>
+
+    <script>
+        // Load categories
+        fetch('http://localhost:8080/category/all')
+            .then(res => res.json())
+            .then(categories => {
+                const catDiv = document.getElementById('categoryList');
+                categories.forEach(cat => {
+                    const btn = document.createElement('button');
+                    btn.innerText = cat.categoryName;
+                    btn.onclick = () => loadProductsByCategoryName(cat.categoryName);
+                    catDiv.appendChild(btn);
+                });
+            })
+            .catch(err => {
+                console.error("Error loading categories:", err);
+            });
+
+        // Load products by category name
+        function loadProductsByCategoryName(categoryName) {
+            fetch(`http://localhost:8080/category/products?categoryName=${encodeURIComponent(categoryName)}`)
+                .then(res => {
+                    if (!res.ok) throw new Error("Failed to load products");
+                    return res.json();
+                })
+                .then(products => {
+                    const productDiv = document.getElementById('productList');
+                    productDiv.innerHTML = '';
+
+                    if (products.length === 0) {
+                        productDiv.innerHTML = "<p>No products in this category yet.</p>";
+                        return;
+                    }
+
+                    products.forEach(p => {
+                        const div = document.createElement('div');
+                        div.className = 'product';
+                        div.innerHTML = `
+                            <div class="product-info">
+                                <h3>${p.productName}</h3>
+                                <p>Price: ₹${p.price}</p>
+                                <button class="buy-btn" onclick='buyNow(${JSON.stringify(p)})'>Buy Now</button>
+                                <button class="cart-btn" onclick='addToCart(${JSON.stringify(p)})'>Add to Cart</button>
+                            </div>
+                        `;
+                        productDiv.appendChild(div);
+                    });
+                })
+                .catch(err => {
+                    console.error("Error loading products:", err);
+                    alert("Could not load products. Try again later.");
+                });
+        }
+
+        function buyNow(product) {
+            const userId = sessionStorage.getItem("userId");
+            if (!userId) {
+                alert("Please login first.");
+                window.location.href = "/Login.html";
+                return;
+            }
+
+            fetch(`http://localhost:8080/orders/place?userId=${userId}&productId=${product.productId}`, {
+                method: 'POST'
+            })
+            .then(res => res.text())
+            .then(msg => {
+                alert("Buy successful!");
+            })
+            .catch(err => {
+                console.error("Error placing order:", err);
+                alert("Failed to place order.");
+            });
+        }
+
+        function addToCart(product) {
+            const userId = sessionStorage.getItem("userId");
+            if (!userId) {
+                alert("Please login first.");
+                window.location.href = "/Login.html";
+                return;
+            }
+
+            fetch(`http://localhost:8080/cart/add?userId=${userId}&productId=${product.productId}&quantity=1`, {
+                method: 'POST'
+            })
+            .then(res => res.text())
+            .then(msg => {
+                alert(`${product.productName} added to cart!`);
+            })
+            .catch(err => {
+                console.error("Error adding to cart:", err);
+                alert("Failed to add to cart.");
+            });
+        }
+    </script>
+</body>
+</html>

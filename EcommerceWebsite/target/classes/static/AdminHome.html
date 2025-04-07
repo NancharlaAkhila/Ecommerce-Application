@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin - Home</title>
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #f1f8ff, #e0f7fa);
+      color: #333;
+    }
+
+    .header {
+      background-color: #ffffff;
+      color: #333;
+      padding: 20px 40px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .header h2 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .logout-btn {
+      position: absolute;
+      right: 30px;
+      top: 20px;
+      background-color: #ff7043;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+
+    .logout-btn:hover {
+      background-color: #f4511e;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .action-card {
+      background: #ffffff;
+      padding: 25px;
+      width: 250px;
+      text-align: center;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s;
+      background-color: #fafafa;
+    }
+
+    .action-card:hover {
+      transform: scale(1.05);
+      background-color: #f0f4f7;
+    }
+
+    .action-card h3 {
+      font-size: 22px;
+      margin-bottom: 15px;
+    }
+
+    .action-card a {
+      text-decoration: none;
+      padding: 12px 20px;
+      background-color: #4caf50;
+      color: white;
+      border-radius: 6px;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+
+    .action-card a:hover {
+      background-color: #388e3c;
+    }
+
+    @media (max-width: 600px) {
+      .logout-btn {
+        padding: 8px 12px;
+        top: 15px;
+        right: 20px;
+      }
+
+      .container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .action-card {
+        margin-bottom: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>Admin - Home</h2>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <div class="container">
+    <div class="action-card">
+      <h3>Manage Products</h3>
+      <a href="AddProduct.html">Go to Manage Products</a>
+    </div>
+
+    <div class="action-card">
+      <h3>Manage Categories</h3>
+      <a href="AddCategory.html">Go to Manage Categories</a>
+    </div>
+  </div>
+
+  <script>
+    // Session check on page load
+    window.onload = function () {
+      fetch("http://localhost:8080/admin/check-session")
+        .then(res => res.json())
+        .then(data => {
+          if (!data.loggedIn || !data.isAdmin) {
+            window.location.href = "StartPage.html";
+          }
+        })
+        .catch(err => {
+          console.error("Session check failed", err);
+          window.location.href = "StartPage.html";
+        });
+    };
+
+    function logout() {
+      fetch("http://localhost:8080/admin/logout")
+        .then(() => {
+          sessionStorage.removeItem("adminId");
+          window.location.href = "StartPage.html";
+        })
+        .catch(err => {
+          console.error("Logout failed", err);
+          window.location.href = "StartPage.html";
+        });
+    }
+  </script>
+</body>
+</html>

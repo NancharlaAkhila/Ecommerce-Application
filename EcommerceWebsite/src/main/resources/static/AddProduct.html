@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Manage Product</title>
+    <meta http-equiv="Cache-Control" content="no-store" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to right, #eef2f3, #8e9eab);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            width: 400px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 90%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 10px;
+            margin: 0 5px;
+            font-size: 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .add { background-color: #28a745; color: white; }
+        .add:hover { background-color: #218838; }
+
+        .update { background-color: #ffc107; color: white; }
+        .update:hover { background-color: #e0a800; }
+
+        .delete { background-color: #dc3545; color: white; }
+        .delete:hover { background-color: #c82333; }
+
+        .alert {
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 6px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .alert-success { background-color: #d4edda; color: #155724; }
+        .alert-error { background-color: #f8d7da; color: #721c24; }
+
+        .back-link {
+            margin-top: 25px;
+            display: inline-block;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Manage Product</h2>
+
+    <input type="text" id="productName" placeholder="Product Name" required>
+    <input type="number" id="productPrice" placeholder="Price (for Add/Update)">
+    <input type="text" id="categoryName" placeholder="Category Name (for Add/Update)">
+
+    <div class="buttons">
+        <button class="add" onclick="addProduct()">Add</button>
+        <button class="update" onclick="updateProduct()">Update</button>
+        <button class="delete" onclick="deleteProduct()">Delete</button>
+    </div>
+
+    <div id="message" class="alert"></div>
+
+    <a class="back-link" href="AdminHome.html">⬅️ Back to Admin Home</a>
+</div>
+
+<script>
+    // Admin session check
+    if (!sessionStorage.getItem("adminId")) {
+        alert("Unauthorized access. Please login as Admin.");
+        window.location.href = "StartPage.html";
+    }
+
+    function showMessage(msg, type) {
+        const messageDiv = document.getElementById("message");
+        messageDiv.textContent = msg;
+        messageDiv.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'}`;
+        messageDiv.style.display = 'block';
+    }
+
+    function addProduct() {
+        const name = document.getElementById("productName").value.trim();
+        const price = parseFloat(document.getElementById("productPrice").value);
+        const categoryName = document.getElementById("categoryName").value.trim();
+
+        if (!name || isNaN(price) || !categoryName) {
+            showMessage("Please fill in all fields for adding.", "error");
+            return;
+        }
+
+        fetch("http://localhost:8080/category/product/add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, price, categoryName })
+        })
+        .then(res => res.text())
+        .then(msg => showMessage("✅ " + msg, "success"))
+        .catch(err => showMessage("❌ " + err.message, "error"));
+    }
+
+    function updateProduct() {
+        const name = document.getElementById("productName").value.trim();
+        const price = parseFloat(document.getElementById("productPrice").value);
+        const categoryName = document.getElementById("categoryName").value.trim();
+
+        if (!name || isNaN(price) || !categoryName) {
+            showMessage("Please fill in all fields for updating.", "error");
+            return;
+        }
+
+        fetch("http://localhost:8080/category/update", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, price, categoryName })
+        })
+        .then(res => res.text())
+        .then(msg => showMessage("✅ " + msg, "success"))
+        .catch(err => showMessage("❌ " + err.message, "error"));
+    }
+
+    function deleteProduct() {
+        const name = document.getElementById("productName").value.trim();
+
+        if (!name) {
+            showMessage("Please enter product name to delete.", "error");
+            return;
+        }
+
+        fetch(`http://localhost:8080/category/delete/${encodeURIComponent(name)}`, {
+            method: "DELETE"
+        })
+        .then(res => res.text())
+        .then(msg => showMessage("✅ " + msg, "success"))
+        .catch(err => showMessage("❌ " + err.message, "error"));
+    }
+</script>
+
+</body>
+</html>
