@@ -132,12 +132,12 @@
         .then(res => res.json())
         .then(data => {
           if (!data.loggedIn || !data.isAdmin) {
-            window.location.href = "StartPage.html";
+            window.location.href = "index.html";
           }
         })
         .catch(err => {
           console.error("Session check failed", err);
-          window.location.href = "StartPage.html";
+          window.location.href = "index.html";
         });
     };
 
@@ -145,11 +145,11 @@
       fetch("http://localhost:8080/admin/logout")
         .then(() => {
           sessionStorage.removeItem("adminId");
-          window.location.href = "StartPage.html";
+          window.location.href = "index.html";
         })
         .catch(err => {
           console.error("Logout failed", err);
-          window.location.href = "StartPage.html";
+          window.location.href = "index.html";
         });
     }
   </script>
