@@ -128,12 +128,12 @@
     const userId = sessionStorage.getItem("userId");
 
     if (!userId) {
-      window.location.href = "StartPage.html";
+      window.location.href = "index.html";
     }
 
     function logout() {
       sessionStorage.clear();
-      window.location.replace("StartPage.html");
+      window.location.replace("index.html");
     }
 
     fetch(`http://localhost:8080/orders/history?userId=${userId}`)
